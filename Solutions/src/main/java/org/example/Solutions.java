@@ -1,12 +1,9 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Solutions {
-  // Swapings
+  // Swaps
   static int[] buildArray(int[] nums) {
     aPermutation(nums,0);
 
@@ -260,6 +257,108 @@ public class Solutions {
       }
     }
     return root;
+  }
+
+  public static int lengthOfLongestSubstring(String s) {
+    int len = s.length();
+    int max_len = 0;
+
+    Map<Character, Integer> map = new HashMap<Character, Integer>();
+
+    int left = 0;
+
+    for (int right = 0; right < len; right++) {
+      if ((!map.containsKey(s.charAt(right))) || (map.get(s.charAt(right)) < left)) {
+        map.put(s.charAt(right), right);
+        max_len = Math.max(max_len, right - left + 1);
+      } else {
+        left = map.get(s.charAt(right)) + 1;
+        map.put(s.charAt(right), right);
+      }
+    }
+
+    return max_len;
+  }
+
+  public static int reverseInt(int x) {
+    boolean sign = true;
+    if (x < 0) {
+      x *= -1;
+      sign = false;
+    }
+    int reverse = 0;
+    while (x > 0) {
+      int tempo = x % 10;
+      x = x / 10;
+
+      if ((reverse > Integer.MAX_VALUE/10)) {
+        return 0;
+      }
+      if ((reverse < Integer.MIN_VALUE/10)) {
+        return 0;
+      }
+
+      reverse = reverse * 10 + tempo;
+    }
+
+    return sign ? reverse:reverse * (-1);
+  }
+
+  // https://leetcode.com/problems/contains-duplicate/
+  static public boolean containsDuplicate(int[] nums) {
+    HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
+
+    for (int item: nums) {
+      if (!map.containsKey(item)) {
+        map.put(item, 1);
+      } else {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // https://leetcode.com/problems/valid-anagram/
+  static public boolean isAnagram(String s, String t) {
+    HashMap<Character, Integer> s_map = new HashMap<Character, Integer>();
+    HashMap<Character, Integer> t_map = new HashMap<Character, Integer>();
+
+    for (int i = 0; i < s.length(); i++) {
+      if (s_map.containsKey(s.charAt(i))) {
+        s_map.put(s.charAt(i), s_map.get(s.charAt(i)) + 1);
+      } else {
+        s_map.put(s.charAt(i), 1);
+      }
+    }
+
+    for (int i = 0; i < t.length(); i++) {
+      if (t_map.containsKey(t.charAt(i))) {
+        t_map.put(t.charAt(i), t_map.get(t.charAt(i)) + 1);
+      } else {
+        t_map.put(t.charAt(i), 1);
+      }
+    }
+
+    return s_map.equals(t_map);
+  }
+
+  // https://leetcode.com/problems/group-anagrams/
+  static public List<List<String>> groupAnagrams(String[] strs) {
+    List<HashMap<Character, Integer>> maps = new ArrayList<HashMap<Character, Integer>>();
+
+    for (int i = 0; i < strs.length; i++) {
+      maps.add(new HashMap<Character, Integer>());
+      for (int j = 0; j < strs[i].length(); j++) {
+        maps.get(i).put(strs[i].charAt(j), maps.get(i).getOrDefault(strs[i].charAt(j), 1));
+      }
+    }
+    List<List<String>> ans = new ArrayList<List<String>>();
+
+    Set<HashMap<Character, Integer>> set = new HashSet<HashMap<Character, Integer>>(maps);
+
+
+    return ans;
   }
 }
 
