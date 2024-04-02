@@ -343,22 +343,297 @@ public class Solutions {
     return s_map.equals(t_map);
   }
 
+  static public boolean isAnagramCharArr(String s, String t) {
+    char[] first = s.toCharArray();
+    Arrays.sort(first);
+
+    char[] second = t.toCharArray();
+    Arrays.sort(second);
+
+    return Arrays.equals(first, second);
+  }
+
   // https://leetcode.com/problems/group-anagrams/
   static public List<List<String>> groupAnagrams(String[] strs) {
-    List<HashMap<Character, Integer>> maps = new ArrayList<HashMap<Character, Integer>>();
+
+    // map  |palindrome chars         |  palindromes |
+    HashMap<HashMap<Character, Integer>, List<String>> ans_map = new HashMap<>();
 
     for (int i = 0; i < strs.length; i++) {
-      maps.add(new HashMap<Character, Integer>());
+      HashMap<Character, Integer> map = new HashMap<Character, Integer>();
+
       for (int j = 0; j < strs[i].length(); j++) {
-        maps.get(i).put(strs[i].charAt(j), maps.get(i).getOrDefault(strs[i].charAt(j), 1));
+        if (map.containsKey(strs[i].charAt(j))) {
+          map.put(strs[i].charAt(j), map.get(strs[i].charAt(j)) + 1);
+        } else {
+          map.put(strs[i].charAt(j), 1);
+        }
+      }
+
+      if (!ans_map.containsKey(map)) {
+        ans_map.put(map, new ArrayList<>());
+      }
+      ans_map.get(map).add(strs[i]);
+    }
+
+    return new ArrayList<>(ans_map.values());
+  }
+
+  static public List<List<String>> groupAnagramsCharArr(String[] strs) {
+    HashMap<String, List<String>> map = new HashMap<>();
+
+    for (String word: strs) {
+      char[] char_word = word.toCharArray();
+      Arrays.sort(char_word);
+      String sorted_word = new String(char_word);
+
+      if (!map.containsKey(sorted_word)) {
+        map.put(sorted_word, new ArrayList<>());
+      }
+
+      map.get(sorted_word).add(sorted_word);
+    }
+
+    return new ArrayList<>(map.values());
+  }
+
+
+  public static boolean checkCol(char[][] board, int row, int col) {
+    char val = board[row][col];
+    for (int i = 0; i < 9; i++) {
+      if ((board[i][col] == val) && (i != row)) {
+        return false;
       }
     }
-    List<List<String>> ans = new ArrayList<List<String>>();
+    return true;
+  }
 
-    Set<HashMap<Character, Integer>> set = new HashSet<HashMap<Character, Integer>>(maps);
+  public static boolean checkRow(char[][] board, int row, int col) {
+    char val = board[row][col];
+    for (int i = 0; i < 9; i++) {
+      if ((board[row][i] == val) && (i != col)) {
+        return false;
+      }
+    }
+    return true;
+  }
 
+
+
+  public static boolean checkSector(char[][] board, int row, int col) {
+    char val = board[row][col];
+
+    int sector_row = row / 3, sector_col = col / 3;
+
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        if ((board[i + (sector_row * 3)][j + (sector_col * 3)] == val) &&
+                (i + (sector_row * 3) != row) && (j + (sector_col * 3) != col)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+  static public boolean isValidSudoku(char[][] board) {
+    for (int i = 0; i < 9; i++) {
+      for (int j = 0; j < 9; j++) {
+        if (board[i][j] != '.') {
+          if (!((checkCol(board, i, j)) && checkRow(board, i, j) && checkSector(board, i, j))) {
+            return false;
+          }
+        }
+      }
+    }
+
+    return true;
+  }
+
+
+  // https://leetcode.com/problems/top-k-frequent-elements/description/
+  public static int[] topKFrequent(int[] nums, int k) {
+    Map<Integer, Integer> frequencies = new HashMap<>();
+    List<Integer>[] frequencies_with_keys = new List[nums.length + 1];
+
+    for (int num : nums) {
+      if (!frequencies.containsKey(num)) {
+        frequencies.put(num, 1);
+      } else {
+        frequencies.put(num, frequencies.get(num) + 1);
+      }
+    }
+
+    for (int key: frequencies.keySet()) {
+      int frequency = frequencies.get(key);
+      if (frequencies_with_keys[frequency] == null) {
+        frequencies_with_keys[frequency] = new ArrayList<>();
+      }
+      frequencies_with_keys[frequency].add(key);
+    }
+
+    int[] ans = new int[k];
+    int index = k;
+
+    for (int i = frequencies_with_keys.length - 1; i >= 0; i--) {
+      if (frequencies_with_keys[i] != null) {
+        List<Integer> list = frequencies_with_keys[i];
+        int[] array = list.stream().mapToInt(Integer::intValue).toArray();
+        int size = array.length;
+
+        // Переносим элементы из array в ans, уменьшая index
+        for (int j = size - 1; j >= 0 && index > 0; j--) {
+          ans[--index] = array[j];
+        }
+      }
+    }
 
     return ans;
   }
-}
 
+  // https://leetcode.com/problems/product-of-array-except-self/
+  public static int[] productExceptSelf(int[] nums) {
+    int[] prefix_mult = new int[nums.length];
+    int[] suffix_mult = new int[nums.length];
+
+    prefix_mult[0] = 0;
+    prefix_mult[1] = nums[0];
+    for (int i = 2; i < nums.length; i++) {
+      prefix_mult[i] = prefix_mult[i - 1] * nums[i - 1];
+    }
+
+    suffix_mult[suffix_mult.length - 1] = 0;
+    suffix_mult[suffix_mult.length - 2] = nums[nums.length - 1];
+    for (int i = nums.length - 3; i > -1; i--) {
+      suffix_mult[i] = suffix_mult[i + 1] * nums[i + 1];
+    }
+
+    int[] ans = new int[nums.length];
+    ans[0] = suffix_mult[0];
+    ans[ans.length - 1] = prefix_mult[prefix_mult.length - 1];
+
+    for (int i = 1; i < nums.length - 1; i++) {
+      ans[i] = prefix_mult[i] * suffix_mult[i];
+    }
+
+    return ans;
+  }
+
+
+  // https://leetcode.com/problems/longest-consecutive-sequence/
+  public static int longestConsecutive(int[] nums) {
+
+    if (nums.length == 0) {
+      return 0;
+    }
+    if (nums.length == 1) {
+      return 1;
+    }
+    Arrays.sort(nums);
+
+    int max = 0;
+    int local_max = 0;
+    for (int i = 0; i < nums.length - 1; i++) {
+      if (nums[i] + 1 == nums[i + 1]) {
+        local_max++;
+      } else if (nums[i] == nums[i + 1]) {
+
+      } else if((max <= local_max)) {
+        max = local_max;
+        local_max = 0;
+      } else {
+        local_max = 0;
+      }
+    }
+
+    if (max < local_max) {
+      return local_max + 1;
+    } else {
+      return max + 1;
+    }
+  }
+
+  //https://leetcode.com/problems/valid-parentheses/description/
+  static public boolean isValid(String s) {
+    if (s.length() % 2 != 0) {
+      return false;
+    }
+
+    Stack<Character> stack = new Stack<>();
+
+    for (int i = 0; i < s.length(); i++) {
+      char new_char = s.charAt(i);
+      if (!stack.empty()) {
+        char peek_char = stack.peek();
+        if ((new_char - peek_char == 1) || (new_char - peek_char == 2)) {
+          stack.pop();
+        } else {
+          stack.add(new_char);
+        }
+      } else {
+        stack.add(new_char);
+      }
+    }
+
+    return stack.empty();
+  }
+
+  public static boolean isValidAlter(String s) {
+    Stack<Character> stack = new Stack<>();
+
+    for (char character: s.toCharArray()) {
+      if (character == '(') {
+        stack.push(')');
+      } else if (character == '{') {
+        stack.push('}');
+      } else if (character == '[') {
+        stack.push(']');
+      } else if (stack.isEmpty() || stack.pop() != character) {
+        return false;
+      }
+    }
+
+    return stack.isEmpty();
+  }
+
+  // https://leetcode.com/problems/min-stack/submissions/1186776133/
+  class Pair {
+    int value, minVal;
+    Pair(int value, int minVal) {
+      this.value = value;
+      this.minVal = minVal;
+    }
+  }
+  class MinStack {
+    Stack<Pair> stack;
+    public MinStack() {
+      stack = new Stack<>();
+    }
+
+    public void push(int val) {
+      if (stack.isEmpty()) {
+        stack.push(new Pair(val, val));
+      } else  {
+        stack.push(new Pair(val, Math.min(stack.peek().minVal, val)));
+      }
+    }
+
+    public void pop() {
+      stack.pop();
+    }
+
+    public int top() {
+      return stack.peek().value;
+    }
+
+    public int getMin() {
+      return stack.peek().minVal;
+    }
+  }
+
+  public int[] dailyTemperatures(int[] temperatures) {
+
+
+    return new int[]{1};
+  }
+}
