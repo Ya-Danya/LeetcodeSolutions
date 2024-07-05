@@ -3,7 +3,21 @@ package org.example;
 import java.util.*;
 
 public class Solutions {
-  // Swaps
+  /*
+  1920. Build Array from Permutation.
+  https://leetcode.com/problems/build-array-from-permutation/description/
+
+  Given a zero-based permutation nums (0-indexed), build an array ans of the same length where
+  ans[i] = nums[nums[i]] for each 0 <= i < nums.length and return it.
+
+  A zero-based permutation nums is an array of distinct integers from 0 to nums.length - 1 (inclusive).
+   */
+
+  /**
+   * Permutation of an array that follow the rule: ans[i] = nums[nums[i]]
+   * @param nums zero-based permutation nums is an array of distinct integers from 0 to nums.length - 1 (inclusive).
+   * @return an array ans of the same length where ans[i] = nums[nums[i]]
+   */
   static int[] buildArray(int[] nums) {
     aPermutation(nums,0);
 
@@ -18,12 +32,37 @@ public class Solutions {
     }
   }
 
-  // Split
-  static String defangIPaddr(String adress) {
-    return adress.replace(".", "[.]");
+  /*
+  1108. Defanging an IP Address
+  https://leetcode.com/problems/defanging-an-ip-address/description/
+  Given a valid (IPv4) IP address, return a defanged version of that IP address.
+
+  A defanged IP address replaces every period "." with "[.]".
+   */
+
+  /**
+   * Replasing . with [.] in IPv4.
+   * @param address IP
+   * @return parsed
+   */
+  static String defangingIPAddress(String address) {
+    return address.replace(".", "[.]");
   }
 
-  // Max achievable
+  /*
+  2769. Find the Maximum Achievable Number
+  https://leetcode.com/problems/find-the-maximum-achievable-number/description/
+  Given two integers, num and t. A number is achievable if it can become equal to num after applying the following operation:
+  Increase or decrease the number by 1, and simultaneously increase or decrease num by 1.
+  Return the maximum achievable number after applying the operation at most t times.
+   */
+
+  /**
+   * Finding maximum achievable number.
+   * @param num the first number
+   * @param t the second number
+   * @return maximum achievable number after applying the operation at most t times
+   */
   static int theMaximumAchievableX(int num, int t) {
     return num + (t * 2);
   }
@@ -45,12 +84,26 @@ public class Solutions {
     return ans;
   }
 
-  // Sum of two
+  /*
+     1. Two Sum. https://leetcode.com/problems/two-sum/
+     Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
+     You may assume that each input would have exactly one solution, and you may not use the same element twice.
+     You can return the answer in any order.
+   */
+
+  /**
+   * Finding indices of the two numbers such that they add up to target.
+   * @param nums array of numbers where we find sum.
+   * @param target target value.
+   * @return resulting array.
+   */
   static public int[] twoSum(int[] nums, int target) {
     Map<Integer, Integer> map = new HashMap<>();
+    // Adding elements from the first arr.
     for (int i = 0; i < nums.length; i++) {
       map.put(nums[i], i);
     }
+
     for (int i = 0; i < nums.length; i++) {
       int complement = target - nums[i];
       if (map.containsKey(complement) && map.get(complement) != i) {
@@ -146,6 +199,55 @@ public class Solutions {
     int str_len = string.length();
     for (int i = 0; i < str_len / 2; i++) {
       if (string.charAt(i) != string.charAt(str_len - i - 1)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // https://leetcode.com/problems/valid-palindrome/description/
+  /**
+   * Find if the word is a palindrome.
+   * @param s word.
+   * @return is the word a palindrome.
+   */
+  static public boolean isPalindrome(String s) {
+    s = s.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+    for (int i = 0; i < s.length() / 2; i++) {
+      if (s.charAt(i) != s.charAt(s.length() - i - 1)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Find if the word is a palindrome.
+   * @param s word.
+   * @return is the word a palindrome.
+   */
+  static public boolean isPalindromeOptimized(String s) {
+    char[] chars = s.toCharArray();
+    int iter = 0, jiter = chars.length - 1;
+    while (iter < jiter) {
+      if (chars[iter] >= 'A' && chars[iter] <= 'Z') {
+        chars[iter] += 32;
+      }
+      if (!(chars[iter] >= 'a' && chars[iter] <= 'z') && !(chars[iter] >= '0' && chars[iter] <= '9')) {
+        iter ++;
+        continue;
+      }
+
+      if (chars[jiter] >= 'A' && chars[jiter] <= 'Z') {
+        chars[jiter] += 32;
+      }
+      if (!(chars[jiter] >= 'a' && chars[jiter] <= 'z') && !(chars[jiter] >= '0' && chars[jiter] <= '9')) {
+        jiter --;
+        continue;
+      }
+
+      if (chars[iter++] != chars[jiter--]) {
+
         return false;
       }
     }
@@ -597,44 +699,82 @@ public class Solutions {
   }
 
   // https://leetcode.com/problems/min-stack/submissions/1186776133/
-  class Pair {
-    int value, minVal;
-    Pair(int value, int minVal) {
-      this.value = value;
-      this.minVal = minVal;
+  public  class MinStack {
+    private class Node{
+      int min;
+      int value;
+      Node next_node;
+
+      public Node() {
+      }
+
+      public Node(int min, int value, Node next_node) {
+        this.min = min;
+        this.value = value;
+        this.next_node = next_node;
+      }
+      public Node(int min, int value) {
+        this(min, value, null);
+      }
     }
-  }
-  class MinStack {
-    Stack<Pair> stack;
+    Node root;
     public MinStack() {
-      stack = new Stack<>();
+
     }
 
     public void push(int val) {
-      if (stack.isEmpty()) {
-        stack.push(new Pair(val, val));
-      } else  {
-        stack.push(new Pair(val, Math.min(stack.peek().minVal, val)));
+      if (root == null) {
+        root = new Node(val,val);
+      } else {
+        root = new Node(Math.min(root.min, val), val, root);
       }
     }
 
     public void pop() {
-      stack.pop();
+      root = root.next_node;
     }
 
     public int top() {
-      return stack.peek().value;
+      return root.value;
     }
 
     public int getMin() {
-      return stack.peek().minVal;
+      return root.min;
     }
   }
 
-  public int[] dailyTemperatures(int[] temperatures) {
+  public static int[] dailyTemperatures(int[] temperatures) {
+    Deque<Integer> deque = new ArrayDeque<>();
+    int[] ans = new int[temperatures.length];
+
+    for (int i = temperatures.length - 1; i >= 0; i--) {
+      // Если дек максимальной температуры пустой, то добавляем туда индекс элемента, а значение ans[i] = 0
+      if (deque.isEmpty()) {
+        deque.offerFirst(i);
+        ans[i] = 0;
+      } else {
+        // Пока у нас не пустой дек или нет элемента, который больше текущего в temperatures удаляем из дека элементы
+        while (!deque.isEmpty() && temperatures[i] >= temperatures[deque.peekFirst()]) {
+          deque.pollFirst();
+        }
+
+        // Если мы все-таки не нашли подходящий элемент, то записываем 0,
+        // если нашли, то вычисляем сколько дней ждать и записываем в ans.
+        if (deque.isEmpty()) {
+          ans[i] = 0;
+        } else {
+          ans[i] = deque.peekFirst() - i;
+        }
+
+        // Добавляем новый элемент.
+        // Не делаем проверку на больше максимального, тк нам не нужен глобальный максимум,
+        // мы ищем первый, который больше.
+        deque.offerFirst(i);
+      }
+    }
 
 
-    return new int[]{1};
+    return ans;
   }
 
   public static int maxWidthOfVerticalArea(int[][] points) {
@@ -654,5 +794,89 @@ public class Solutions {
     }
 
     return max_range;
+  }
+
+  /*
+  https://leetcode.com/problems/generate-parentheses/description/
+   */
+
+  public static void generation(StringBuilder cur, int to_open, int to_close, List<String> ans) {
+    if (to_close == 0 && to_open == 0) {
+      ans.add(cur.toString());
+      return;
+    }
+    if (to_open > 0) {
+      cur.append('(');
+      generation(cur, to_open - 1, to_close + 1, ans);
+      cur.deleteCharAt(cur.length() - 1);
+    }
+    if (to_close > 0) {
+      cur.append(')');
+      generation(cur, to_open, to_close - 1, ans);
+      cur.deleteCharAt(cur.length() - 1);
+    }
+  }
+
+  public static List<String> generateParentheses(int n) {
+    List<String> ans = new ArrayList<>();
+    StringBuilder cur = new StringBuilder();
+    generation(cur, n, 0, ans);
+
+    return ans;
+  }
+
+  /*
+  https://leetcode.com/problems/evaluate-reverse-polish-notation/description/
+  You are given an array of strings tokens that represents an arithmetic expression in a Reverse Polish Notation.
+
+Evaluate the expression. Return an integer that represents the value of the expression.
+
+Note that:
+
+The valid operators are '+', '-', '*', and '/'.
+Each operand may be an integer or another expression.
+The division between two integers always truncates toward zero.
+There will not be any division by zero.
+The input represents a valid arithmetic expression in a reverse polish notation.
+The answer and all the intermediate calculations can be represented in a 32-bit integer.
+   */
+  static public int evalRPN(String[] tokens) {
+    Deque<Integer> numbers = new ArrayDeque<>();
+    Deque<Character> ops = new ArrayDeque<>();
+
+
+    for (int i = 0; i < tokens.length; i++) {
+      if (tokens[i].length() == 1 && !(tokens[i].charAt(0) >= '0' && tokens[i].charAt(0) <= '9')) {
+        ops.offerLast(tokens[i].charAt(0));
+      } else {
+        numbers.offerLast(Integer.parseInt(tokens[i]));
+      }
+
+      while (numbers.size() > 1 && ops.size() > 0){
+        int first = numbers.pollLast();
+        int second = numbers.pollLast();
+        switch (ops.pollLast()) {
+          case '-': {
+            numbers.offerLast(second - first );
+            break;
+          }
+          case '+': {
+            numbers.offerLast(first + second );
+            break;
+          }
+          case '/': {
+
+            numbers.offerLast(second / first );
+            break;
+          }
+          case '*': {
+            numbers.offerLast(first * second );
+            break;
+          }
+        }
+      }
+    }
+
+    return numbers.pollFirst();
   }
 }
