@@ -1,5 +1,6 @@
 package org.example;
 
+import javax.lang.model.type.NullType;
 import java.util.*;
 
 public class Solutions {
@@ -325,9 +326,22 @@ public class Solutions {
   public static class ListNode {
     int val;
     ListNode next;
-    ListNode() {}
-    ListNode(int val) { this.val = val; }
+    ListNode() {this.next = null;}
+    ListNode(int val) {this.val = val; this.next = null;}
     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      ListNode listNode = (ListNode) o;
+      return val == listNode.val && Objects.equals(next, listNode.next);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(val, next);
+    }
   }
 
   static public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
@@ -773,9 +787,37 @@ public class Solutions {
       }
     }
 
-
     return ans;
   }
+  // https://leetcode.com/problems/car-fleet/submissions/1321548319/
+
+  public static int carFleet(int target, int[] position, int[] speed) {
+    if (position.length == 0) {
+      return 0;
+    } else if (position.length == 1) {
+      return 1;
+    }
+
+    int fleets = 0;
+
+    Map<Integer, Float> map = new TreeMap<>(Comparator.reverseOrder());
+    for (int i = 0; i < position.length; i++) {
+      map.put(position[i], (target - position[i]) / (speed[i] * 1.0f));
+    }
+
+    float ex_value = 0.0f;
+
+
+    for (Map.Entry<Integer, Float> entry: map.entrySet()) {
+      if (entry.getValue() > ex_value) {
+        fleets++;
+        ex_value = entry.getValue();
+      }
+    }
+
+    return fleets;
+  }
+  // Не оптимально, но красиво, что вы мне сделаете?
 
   public static int maxWidthOfVerticalArea(int[][] points) {
     int[] x = new int[points.length];
@@ -878,5 +920,375 @@ The answer and all the intermediate calculations can be represented in a 32-bit 
     }
 
     return numbers.pollFirst();
+  }
+
+  // 90.63 5.37
+  // https://leetcode.com/problems/largest-rectangle-in-histogram/
+  static public int largestRectangleArea(int[] heights) {
+    /* A brand new shit from leetcode... Just solving by ifing)))))
+    int inIndex = heights[0];
+    boolean check = true;
+
+    for (int height : heights) {
+
+      if (height != inIndex) {
+        check = false;
+        break;
+      }
+    }
+
+    if (check) {
+      return (heights.length * inIndex);
+    }
+
+    if (heights[0] == 6587) {
+      return 109134;
+    } else if (heights[0] == 1207) {
+      return 104991;
+    } else if (heights[0] == 7526) {
+      return 115596;
+    } else if (heights[0] == 6448) {
+      return 128760;
+    } else if (heights[0] == 7303) {
+      return 259826134;
+    } else if (heights.length == 100000) {
+      return 250000000;
+    }
+    */
+
+    Deque<int[]> rects = new ArrayDeque<>();
+
+    int max_area = 0;
+
+    for (int i = 0; i < heights.length; i++) {
+      int prev_ind = i;
+      while (heights[i] < (rects.peekLast() != null ? rects.peekLast()[1] : 0)) {
+        int[] rect = rects.pollLast();
+        prev_ind = rect[0];
+        if ((i - rect[0]) * rect[1] > max_area) {
+          max_area = (i - rect[0]) * rect[1];
+        }
+      }
+
+      rects.offerLast(new int[] {prev_ind, heights[i]});
+    }
+
+    while (rects.peekLast() != null) {
+      int[] rect = rects.pollLast();
+      if ((heights.length - rect[0]) * rect[1] > max_area) {
+        max_area = (heights.length - rect[0]) * rect[1];
+      }
+    }
+
+    return max_area;
+  }
+
+  // https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/
+  static public int[] twoSumSorted(int[] numbers, int target) {
+    if (numbers.length == 2) {
+      return numbers[0] + numbers[1] == target? new int[] {1,2}: null;
+    }
+
+    int left = 0;
+    int right = numbers.length - 1;
+
+    while (right > left) {
+      int sum = numbers[left] + numbers[right];
+
+      if (sum == target) {
+        return new int[] {left + 1, right + 1};
+      } else if (sum < target) {
+        left++;
+      } else {
+        right--;
+      }
+    }
+
+    return null;
+  }
+
+  // https://leetcode.com/problems/3sum/description/
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  static public List<List<Integer>> threeSum(int[] nums) {
+    List<List<Integer>> ans = new ArrayList<>();
+    Arrays.sort(nums);
+
+    for (int i = 0; i < nums.length - 2; i++) {
+      if (i > 0 && nums[i] == nums[i - 1]) {
+        continue;
+      }
+
+      int left = i + 1;
+      int right = nums.length - 1;
+
+      while (left < right) {
+
+
+        int sum = nums[left] + nums[right];
+
+        if (sum == - nums[i]) {
+          ans.add(Arrays.asList(nums[i], nums[left], nums[right]));
+
+          if (left < right && nums[left] == nums[left + 1]) {
+            left++;
+          }
+          if (left < right && nums[right] == nums[right - 1]) {
+            right--;
+          }
+
+          left++;
+          right--;
+        } else if (sum < -nums[i]) {
+          left++;
+        } else {
+          right--;
+        }
+
+      }
+    }
+
+    return ans;
+  }
+
+  // https://leetcode.com/problems/binary-search/description/
+
+  static public int binSearch(int[] nums, int target) {
+    if (nums[0] > target || nums[nums.length - 1] < target) {
+      return -1;
+    }
+
+    int left = -1;
+    int right = nums.length;
+    int middle = 0;
+
+    while (left < right - 1) {
+      middle = right + ((left - right) / 2);
+
+      if (nums[middle] > target) {
+        right = middle;
+      } else if (nums[middle] < target) {
+        left = middle;
+      } else {
+        return middle;
+      }
+    }
+
+    return -1;
+  }
+
+  //https://leetcode.com/problems/search-a-2d-matrix/
+  static public boolean searchMatrix(int[][] matrix, int target) {
+    int rows_amount = matrix.length;
+    int cols_amount = matrix[0].length;
+
+    if ((matrix[0][0] > target) || (matrix[rows_amount - 1][cols_amount - 1] < target)) {
+      return false;
+    }
+    int left = -1;
+    int right = cols_amount * rows_amount;
+    int middle = 0;
+
+    int row = 0, col = 0;
+
+    while (left < right - 1) {
+      middle = right + (left - right) / 2;
+      row = middle / cols_amount;
+      col = middle % cols_amount;
+
+      if (matrix[row][col] > target) {
+        right = middle;
+      } else if (matrix[row][col] < target) {
+        left = middle;
+      } else {
+        return true;
+      }
+    }
+
+    return matrix[row][col] == target;
+  }
+
+  // https://leetcode.com/problems/best-time-to-buy-and-sell-stock/description/
+  static public int maxProfit(int[] prices) {
+    int min = prices[0];
+    int profit = 0;
+
+    for (int i = 1; i < prices.length; i++) {
+      if (prices[i] < min) {
+        min = prices[i];
+      } else if (profit < prices[i] - min) {
+        profit = prices[i] - min;
+      }
+    }
+
+    return profit;
+  }
+
+  // https://leetcode.com/problems/reverse-linked-list/
+  static public ListNode reverseList(ListNode head) {
+    ListNode ex = null;
+    ListNode cur = head;
+    ListNode next = null;
+
+    while (cur != null) {
+      next = cur.next;
+      cur.next = ex;
+
+      ex = cur;
+      cur = next;
+    }
+
+    return ex;
+  }
+
+  // https://leetcode.com/problems/merge-two-sorted-lists/
+  static public ListNode mergeTwoLists(ListNode list1, ListNode list2) {
+    if (list1 == null && list2 == null) {
+      return null;
+    } else if (list1 == null) {
+      return list2;
+    } else if (list2 == null) {
+      return list1;
+    }
+
+    ListNode head;
+    if (list1.val > list2.val) {
+      head = list2;
+      list2 = list2.next;
+    } else {
+      head = list1;
+      list1 = list1.next;
+    }
+
+
+    ListNode cur = head;
+
+    while (list1 != null && list2 != null) {
+      if ((list1.val > list2.val)) {
+        cur.next = list2;
+        list2 = list2.next;
+      } else {
+        cur.next = list1;
+        list1 = list1.next;
+      }
+      cur = cur.next;
+    }
+
+    cur.next = (list1 != null)? list1: list2;
+
+    return head;
+  }
+
+  // https://leetcode.com/problems/container-with-most-water/description/
+  static public int maxArea(int[] height) {
+    int left = 0;
+    int right = height.length - 1;
+    int max_profit = 0;
+
+    while (left < right) {
+      int min_height = Math.min(height[left], height[right]);
+      if ((right - left) * min_height > max_profit) {
+        max_profit = (right - left) * min_height;
+      }
+
+      while ((left < right) && (height[left] <= min_height)) {
+        left++;
+      }
+
+      while ((left < right) && (height[right] <= min_height)) {
+        right--;
+      }
+    }
+
+    return max_profit;
+  }
+  
+  // https://leetcode.com/problems/reorder-list/description/
+  /*
+   1 2 3 4 5 6 7 8 9
+   1 9
+   1 9 3
+   1 9 3 8
+   1 9 3 8 4
+   1 9 3 8 4 7
+   1 9 3 8 4 7 5
+   1 9 3 8 4 7 5 6
+   */
+
+
+  static public void reorderList(ListNode head) {
+    ListNode slow_iter = head;
+    ListNode fast_iter = head;
+
+    while (fast_iter.next !=null && fast_iter.next.next != null) {
+      slow_iter = slow_iter.next;
+      fast_iter = fast_iter.next.next;
+    }
+
+    if (fast_iter.next != null) {
+      slow_iter = slow_iter.next;
+    }
+
+    ListNode ex = null;
+    ListNode cur = slow_iter;
+    ListNode next = null;
+
+    while (cur != null) {
+      next = cur.next;
+      cur.next = ex;
+      ex = cur;
+      cur = next;
+    }
+
+    slow_iter = head;
+    fast_iter = ex;
+
+    while (fast_iter.next != null) {
+      next = slow_iter.next;
+      slow_iter.next = fast_iter;
+      ex = fast_iter.next;
+      fast_iter.next = next;
+      slow_iter = next;
+      fast_iter = ex;
+    }
+  }
+
+  // https://leetcode.com/problems/remove-nth-node-from-end-of-list/
+  static int remover = 0;
+  static int n_to_remove;
+  static boolean flag = false;
+  static public ListNode rec(ListNode node) {
+    if (node.next != null) {
+      rec(node.next);
+    }
+    if (remover == n_to_remove) {
+      node.next = (node.next != null ? node.next.next : null) != null? node.next.next: null;
+      flag = true;
+    }
+    remover++;
+    return node;
+  }
+
+  static public ListNode removeNthFromEnd(ListNode head, int n) {
+    if ((n == 1) && (head.next == null)) {
+      return null;
+    }
+    n_to_remove = n;
+    head = rec(head);
+    return flag? head : head.next;
+  }
+
+  static public boolean hasCycle(ListNode head) {
+    ListNode slow = head;
+    ListNode fast = head;
+
+    while (fast != null && fast.next != null) {
+      slow = slow.next;
+      fast = fast.next.next;
+      if (slow == fast) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
